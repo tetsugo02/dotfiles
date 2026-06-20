@@ -1,0 +1,30 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"provider": {
+		"litellm": {
+			"npm": "@ai-sdk/openai-compatible",
+			"name": "LiteLLM",
+			"options": {
+				"baseURL": "https://llm-gateway.keioaic.dev/v1",
+				"apiKey": "{env:KEIOAIC_LLM_API_KEY}"
+			},
+			"models": {
+				"gemma-4-26B-A4B-it": {
+					"name": "gemma-4-26B-A4B-it",
+					"limit": {
+						"context": 131072,
+						"output": 16384
+					}
+				},
+				"gpt-oss-120": {
+					"name": "gpt-oss-120",
+					"limit": {
+						"context": 131072,
+						"output": 16384
+					}
+				}
+			}
+		}
+	},
+	"model": "litellm/gemma-4-26B-A4B-it"
+}

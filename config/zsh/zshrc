@@ -1,0 +1,37 @@
+alias ls="ls --color"
+alias ssh="TERM=xterm-256color ssh"
+
+if [ -f /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
+  source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+fi
+
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+path_prepend() {
+  [ -d "$1" ] || return 0
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) export PATH="$1:$PATH" ;;
+  esac
+}
+
+path_prepend "$HOME/.pixi/bin"
+path_prepend "$HOME/my_cli"
+path_prepend "$HOME/.antigravity/antigravity/bin"
+path_prepend "$HOME/.opencode/bin"
+path_prepend "/opt/homebrew/opt/openjdk@17/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+export PNPM_HOME="$HOME/Library/pnpm"
+path_prepend "$PNPM_HOME"
+
+# Keep real API keys and machine-local credentials out of git.
+[ -f "$HOME/.config/zsh/secrets.zsh" ] && . "$HOME/.config/zsh/secrets.zsh"
+

@@ -1,0 +1,160 @@
+
+## Start private 
+
+Host sirius-home
+	HostName 100.104.0.85
+	User sirius
+
+Host pi
+	HostName 100.74.117.14
+	User pi
+
+## END private
+
+Host remote.educ.cc.keio.ac.jp
+	HostName remote.educ.cc.keio.ac.jp
+	User ub293252
+
+## Region: 研究室
+Host server1
+	HostName gw.murata.elec.keio.ac.jp
+    User tetsugo
+    port 10022
+    IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+
+
+Host A5000_server
+	HostName rtx-a5000.local
+	User tetsugo
+	IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
+
+
+Host temp_headquarter
+	HostName OptiPlex-7070.local
+	User murata-lab
+	IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
+
+
+Host ts-test
+	HostName ts-test.local
+	User tetsugo
+	IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
+
+Host work_pc
+	HostName gf-rtx3080-6.local
+	User tetsugo
+	IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
+Host work_pc_local
+	HostName gf-rtx3080-6.local
+	User tetsugo_local
+	IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
+## end Region: 研究室
+
+
+
+# AIC
+Host aic-gateway-tippy
+	HostName tippy.ai.hc.keio.ac.jp
+Host aic-gateway-chino
+	HostName chino.ai.hc.keio.ac.jp
+Host aic-gateway-cocoa
+	HostName cocoa.ai.hc.keio.ac.jp
+Host aic-gateway-rize
+	HostName rize.ai.hc.keio.ac.jp
+
+Host aic-gateway-tippy aic-gateway-chino aic-gateway-cocoa aic-gateway-rize
+	Port 2221
+	User tto
+	IdentitiesOnly yes
+	ForwardAgent yes
+
+Host aic
+	Hostname jupyterhub-singleuser-instance-hsugiyama.lxd
+	Port 22
+	User ubuntu
+	ProxyJump aic-gateway-tippy
+
+Host aic-gateway-tippy aic-gateway-chino aic-gateway-cocoa aic-gateway-rize aic
+	IdentityFile ~/.ssh/aic_key
+
+
+    ### KEIO-AIC ###
+Host casper
+    HostName casper.ai.hc.keio.ac.jp
+Host balthasar
+    HostName balthasar.ai.hc.keio.ac.jp
+Host melchior
+    HostName melchior.ai.hc.keio.ac.jp
+
+Host tippy
+    HostName tippy.ai.hc.keio.ac.jp
+Host chino
+    HostName chino.ai.hc.keio.ac.jp
+Host cocoa
+    HostName cocoa.ai.hc.keio.ac.jp
+Host rize
+    HostName rize.ai.hc.keio.ac.jp
+
+Host sharo
+    HostName 172.16.0.9
+Host chiya
+    HostName 172.16.0.10
+Host maya
+    HostName 172.16.0.11
+Host megu
+    HostName 172.16.0.12
+
+Host hitagi
+    HostName 172.16.0.13
+Host tsubasa
+    HostName 172.16.0.14
+Host shinobu
+    HostName 172.16.0.15
+Host mayoi
+    HostName 172.16.0.16
+Host suruga
+    HostName 172.16.0.17
+Host nadeko
+    HostName 172.16.0.18
+Host karen
+    HostName 172.16.0.19
+Host tsukihi
+    HostName 172.16.0.20
+
+Host nvidia-1
+    HostName 172.16.0.22
+Host nvidia-2
+    HostName 172.16.0.23
+Host nvidia-3
+    HostName 172.16.0.24
+Host nvidia-4
+    HostName 172.16.0.25
+Host nvidia-5
+    HostName 172.16.0.26
+Host nvidia-6
+    HostName 172.16.0.27
+
+Host dgx-1
+    HostName 172.16.0.30
+    User tto
+
+
+Host casper balthasar melchior tippy chino cocoa rize sharo chiya maya hitagi tsubasa shinobu mayoi suruga nadeko karen tsukihi nvidia-1 nvidia-2 nvidia-3 nvidia-4 nvidia-5 nvidia-6
+    Port 2222
+    User tto
+    IdentityFile ~/.ssh/aic_key
+
+Host sharo chiya maya hitagi tsubasa shinobu mayoi suruga nadeko karen tsukihi nvidia-1 nvidia-2 nvidia-3 nvidia-4 nvidia-5 nvidia-6 dgx-1
+    ProxyJump casper
+
+### END KEIO-AIC ###
