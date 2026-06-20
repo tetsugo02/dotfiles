@@ -14,19 +14,11 @@ brew "zellij"
 brew "node"
 brew "openjdk@17"
 brew "python@3.14"
-brew "pixi"
 
 # Media, documents, and research utilities
 brew "ffmpeg"
 brew "imagemagick"
-brew "ghostscript"
-brew "poppler"
-brew "tesseract"
-brew "texlive"
-
 # Project-specific tools currently installed
-brew "act"
-brew "cloudflared"
 brew "mole"
 brew "repomix"
 
