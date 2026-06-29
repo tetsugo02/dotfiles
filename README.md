@@ -1,50 +1,163 @@
 # dotfiles
 
-Personal macOS development environment bootstrap.
+macOS 向けの個人用開発環境をセットアップする dotfiles です。
 
-## Install
+`install.sh` を実行すると、Homebrew パッケージの導入、Node.js・Rust 環境の準備、各種設定ファイルのシンボリックリンク作成をまとめて行います。
 
-Run this on a new Mac:
+## 対象環境
+
+- macOS（Homebrew のパスは Apple Silicon Mac の `/opt/homebrew` を前提）
+- zsh
+- Git と Homebrew を導入済みであること
+
+## インストール方法
+
+新しい Mac では、先に Xcode Command Line Tools と Homebrew を導入します。
 
 ```sh
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+その後、このリポジトリを取得してセットアップを実行します。
+
+```sh
 git clone git@github.com:tetsugo02/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
 
-If GitHub SSH is not ready yet, clone with HTTPS and switch remotes later.
+GitHub の SSH 鍵をまだ用意していない場合は HTTPS で clone し、必要に応じて後から remote URL を変更してください。
 
-## What This Sets Up
+## セットアップ全体の流れ
 
-- Homebrew packages and casks from `Brewfile`
-- zsh startup files
-- Starship prompt
-- Zellij config
-- opencode config
-- Git identity
-- SSH client config
-- nvm, Node.js, pnpm, uv, Rust, Java 17 paths
+`install.sh` は次の順番で処理します。
 
-## Secrets
+1. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
+2. `Brewfile` に記載された CLI、開発環境、フォントを Homebrew で導入する
+3. nvm を導入し、nvm 経由で Node.js と npm の環境を準備する
+4. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
 
-Secrets are intentionally not tracked. Put local credentials in:
+リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
+
+Homebrew が未導入の場合、Homebrew 部分は案内を表示してスキップします。nvm は必要に応じて公式インストーラーから自動導入します。rustup 自体は自動導入しません。
+
+## 言語・ランタイム環境
+
+| 言語・環境 | バージョン／方式 | セットアップ内容 |
+| --- | --- | --- |
+| Node.js | 22.18.0 / nvm 0.40.4 | nvm を自動導入し、Node.js をインストールして default alias に設定 |
+| npm | Node.js 22.18.0 同梱版 | Node.js と一緒に nvm 管理下へ導入。npm 単体の直接インストールはしない |
+| Corepack | Node.js 同梱版 | `corepack enable` を実行し、対応パッケージマネージャーの shim を有効化 |
+| Python | 3.14 / Homebrew | `python@3.14` を導入 |
+| Java | OpenJDK 17 / Homebrew | `openjdk@17` を導入し、zsh で PATH を追加 |
+| Rust | stable / rustup | rustup が既に導入済みの場合のみ toolchain を導入し、既定に設定 |
+
+Node.js、npm、Corepack は nvm が管理する Node.js のディレクトリから利用します。Homebrew 版 Node.js は導入しません。ただし、既に Homebrew 版 Node.js が存在していても、このスクリプトではアンインストールしません。
+
+Rust も新しい Mac へ完全自動では導入されません。必要な場合は先に [rustup](https://rustup.rs/) を導入し、もう一度 `./install.sh` を実行してください。
+
+### Node.js のグローバルツール
+
+- `@github/copilot` を npm のグローバルパッケージとして導入
+
+このパッケージは、nvm で選択した Node.js 22.18.0 の環境内にインストールされます。
+
+## Homebrew で導入する環境とツール
+
+### 基本 CLI
+
+| ツール | 用途 |
+| --- | --- |
+| `git` | バージョン管理 |
+| `gh` | GitHub CLI |
+| `gnupg` | 署名・暗号化 |
+| `ripgrep` | 高速なテキスト検索 |
+| `tree` | ディレクトリ構造の表示 |
+| `starship` | シェルプロンプト |
+| `zsh-autocomplete` | zsh の入力補完 |
+| `zellij` | ターミナルワークスペース／マルチプレクサ |
+
+### メディア・文書・開発支援
+
+| ツール | 用途 |
+| --- | --- |
+| `ffmpeg` | 音声・動画処理 |
+| `imagemagick` | 画像処理 |
+| `mole` | プロジェクト固有の CLI |
+| `repomix` | リポジトリ内容の集約 |
+| `codex` | Codex CLI／アプリ |
+
+### フォント
+
+- Noto Sans CJK JP
+- Noto Serif CJK JP
+- Roboto Mono Nerd Font
+
+## 配置される設定
+
+| リポジトリ内のファイル | リンク先 | 内容 |
+| --- | --- | --- |
+| `config/zsh/zshrc` | `~/.zshrc` | 補完、Starship、nvm、PATH、alias、秘密情報の読み込み |
+| `config/zsh/zprofile` | `~/.zprofile` | Homebrew の shell environment |
+| `config/zsh/zshenv` | `~/.zshenv` | Cargo 環境の読み込み |
+| `config/zsh/profile` | `~/.profile` | ローカル CLI と Cargo 環境の読み込み |
+| `config/starship/starship.toml` | `~/.config/starship.toml` | Starship の表示設定 |
+| `config/zellij/config.kdl` | `~/.config/zellij/config.kdl` | Zellij のモードとキーバインド |
+| `config/opencode/opencode.json` | `~/.config/opencode/opencode.json` | LiteLLM プロバイダーとモデル設定 |
+| `config/git/gitconfig` | `~/.gitconfig` | Git のユーザー名とメールアドレス |
+| `config/ssh/config` | `~/.ssh/config` | SSH ホスト、鍵、ProxyJump などの接続設定 |
+
+zsh では `ls --color` と、接続先へ `TERM=xterm-256color` を渡す `ssh` alias も設定します。
+
+## PATH だけを設定する外部環境
+
+以下は `install.sh` や `Brewfile` ではインストールせず、対象が既に存在する場合だけ利用できるようにする設定です。ディレクトリまたは設定ファイルが存在しなければ何も変更しないため、未導入の環境でもエラーにはなりません。
+
+| 対象 | 設定 | 現在の自動セットアップに必要か | 残している理由 |
+| --- | --- | --- | --- |
+| pnpm | `~/Library/pnpm` を PATH に追加 | 基本的には不要 | Corepack 管理の pnpm は nvm 側の shim から実行できる。この PATH は pnpm の standalone installer や pnpm のグローバル実行ファイルを使う場合に必要 |
+| uv などのローカル CLI | `~/.local/bin/env` があれば読み込む | 不要 | uv の standalone installer などが作成する環境設定を利用するため。uv 自体はこのリポジトリでは導入しない |
+| Pixi | `~/.pixi/bin` を PATH に追加 | 不要 | Pixi を別途導入したマシンでコマンドを利用するため |
+| 個人用 CLI | `~/my_cli` を PATH に追加 | 不要 | 自作スクリプトや個人用コマンドを直接実行するため |
+| Antigravity | `~/.antigravity/antigravity/bin` を PATH に追加 | 不要 | Antigravity を別途導入した場合に実行ファイルを利用するため |
+| opencode | `~/.opencode/bin` を PATH に追加 | opencode を使わない場合は不要 | opencode の独自インストーラーで配置された実行ファイルを利用するため。設定ファイルだけはこのリポジトリから配置する |
+| Cargo | `~/.cargo/env` があれば読み込む | Rust を使う場合は必要 | rustup が設定する Cargo と Rust toolchain の PATH を有効化するため |
+
+したがって、現在の自動インストールだけに絞れば pnpm、uv、Pixi、個人用 CLI、Antigravity、opencode の PATH 設定は必須ではありません。一方、存在確認付きで副作用が小さく、別の方法で導入済みのツールを複数の Mac でそのまま利用できるため、互換用の設定として残しています。今後これらを使わないことが確定した場合は、対応する行を `config/zsh/zshrc` または `config/zsh/profile` から削除できます。
+
+## 秘密情報
+
+API キーなどの秘密情報は Git で管理しません。サンプルをコピーして、ローカルファイルへ値を設定します。
 
 ```sh
-~/.config/zsh/secrets.zsh
+mkdir -p ~/.config/zsh
+cp config/zsh/secrets.zsh.example ~/.config/zsh/secrets.zsh
 ```
 
-Use `config/zsh/secrets.zsh.example` as a template.
+現在のサンプルには次の環境変数があります。
 
-## Manual Steps
+- `KAGGLE_API_TOKEN`
+- `KEIOAIC_LLM_API_KEY`
 
-- Recreate or migrate SSH private keys into `~/.ssh`
-- Run `gh auth login -h github.com`
-- Sign in to app-store or vendor-installed apps manually
-- Confirm Homebrew ownership if needed:
+`~/.config/zsh/secrets.zsh` は `.zshrc` から、ファイルが存在する場合だけ読み込まれます。実際の秘密情報をこのリポジトリへコミットしないでください。
+
+## 手動で必要な作業
+
+- SSH 秘密鍵を `~/.ssh` に作成または移行する
+- `gh auth login -h github.com` で GitHub CLI を認証する
+- rustup と Rust が必要なら rustup を先に導入する
+- App Store や各ベンダーのアプリへログインする
+- 必要に応じて Homebrew ディレクトリの所有者を確認する
 
 ```sh
 sudo chown -R "$USER":admin /opt/homebrew
 ```
 
+## 設定変更後の反映
+
+dotfiles 内のリンク済みファイルを変更した場合は、その内容がリンク先にも反映されます。zsh の設定は新しいシェルを開くか、次のコマンドで読み直します。
+
+```sh
+source ~/.zshrc
+```

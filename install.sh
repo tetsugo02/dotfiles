@@ -3,6 +3,8 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_SUFFIX="backup.$(date +%Y%m%d%H%M%S)"
+NVM_VERSION="v0.40.4"
+NODE_VERSION="22.18.0"
 
 log() {
   printf '[dotfiles] %s\n' "$*"
@@ -44,18 +46,20 @@ install_homebrew() {
 }
 
 install_nvm() {
-  if [ ! -d "$HOME/.nvm" ]; then
-    log "nvm is not installed. Install nvm manually, then rerun this script."
-    log "https://github.com/nvm-sh/nvm"
-    return
+  export NVM_DIR="$HOME/.nvm"
+
+  if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+    log "installing nvm $NVM_VERSION"
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | PROFILE=/dev/null bash
   fi
 
   # shellcheck source=/dev/null
-  . "$HOME/.nvm/nvm.sh"
-  nvm install 22.18.0
-  nvm alias default 22.18.0
+  . "$NVM_DIR/nvm.sh"
+  nvm install "$NODE_VERSION"
+  nvm alias default "$NODE_VERSION"
+  nvm use default
   corepack enable || true
-  npm install -g @github/copilot npm@10.9.3
+  npm install -g @github/copilot
 }
 
 install_rust() {
@@ -87,4 +91,3 @@ main() {
 }
 
 main "$@"
-
