@@ -1,0 +1,35 @@
+[general]
+import = ["~/.config/alacritty/themes/ayu_mirage.toml"]
+
+[scrolling]
+history = 100000
+multiplier = 5
+
+[window]
+dimensions = { columns = 150, lines = 50 }
+
+[font]
+normal = { family = "RobotoMono Nerd Font", style = "Regular" }
+bold = { family = "RobotoMono Nerd Font", style = "Bold" }
+italic = { family = "RobotoMono Nerd Font", style = "Italic" }
+bold_italic = { family = "RobotoMono Nerd Font", style = "Bold Italic" }
+
+[keyboard]
+bindings = [
+    { key = "Left", mods = "Alt", chars = "\u001bB" },
+    { key = "Right", mods = "Alt", chars = "\u001bF" },
+    { key = "Left", mods = "Command", chars = "\u001bOH" },
+    { key = "Right", mods = "Command", chars = "\u001bOF" },
+    { key = "Back", mods = "Command", chars = "\u0015" },
+]
+
+[cursor]
+blink_interval = 600
+unfocused_hollow = true
+
+[cursor.style]
+blinking = "Always"
+shape = "Block"
+
+[env]
+TERM = "xterm-256color"

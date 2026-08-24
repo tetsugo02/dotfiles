@@ -1,5 +1,4 @@
 alias ls="ls --color"
-alias ssh="TERM=xterm-256color ssh"
 
 if [ -f /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
   source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
@@ -20,18 +19,21 @@ path_prepend() {
 }
 
 path_prepend "$HOME/.pixi/bin"
-path_prepend "$HOME/my_cli"
 path_prepend "$HOME/.antigravity/antigravity/bin"
 path_prepend "$HOME/.opencode/bin"
-path_prepend "/opt/homebrew/opt/openjdk@17/bin"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
-export PNPM_HOME="$HOME/Library/pnpm"
-path_prepend "$PNPM_HOME"
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 # Keep real API keys and machine-local credentials out of git.
 [ -f "$HOME/.config/zsh/secrets.zsh" ] && . "$HOME/.config/zsh/secrets.zsh"
 
+function ssh() {
+    command ssh "$@"
+    local ssh_exit_status=$?
+
+    stty sane
+
+    return "$ssh_exit_status"
+}

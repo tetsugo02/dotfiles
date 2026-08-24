@@ -2,3 +2,5 @@
 	name = tetsugo
 	email = tetsugou2002@gmail.com
 
+[init]
+	defaultBranch = main

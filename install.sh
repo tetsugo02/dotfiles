@@ -3,8 +3,9 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_SUFFIX="backup.$(date +%Y%m%d%H%M%S)"
-NVM_VERSION="v0.40.4"
-NODE_VERSION="22.18.0"
+NODE_VERSION="24.18.0"
+PNPM_VERSION="11.15.0"
+JAVA_VERSION="temurin-25.0.3+9.0.LTS"
 
 log() {
   printf '[dotfiles] %s\n' "$*"
@@ -45,21 +46,16 @@ install_homebrew() {
   brew bundle --file "$DOTFILES_DIR/Brewfile"
 }
 
-install_nvm() {
-  export NVM_DIR="$HOME/.nvm"
-
-  if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-    log "installing nvm $NVM_VERSION"
-    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | PROFILE=/dev/null bash
+install_mise_tools() {
+  if ! command -v mise >/dev/null 2>&1; then
+    log "mise is not installed; skipping Node.js, pnpm, and Java setup"
+    return
   fi
 
-  # shellcheck source=/dev/null
-  . "$NVM_DIR/nvm.sh"
-  nvm install "$NODE_VERSION"
-  nvm alias default "$NODE_VERSION"
-  nvm use default
-  corepack enable || true
-  npm install -g @github/copilot
+  mise use --global --pin \
+    "node@$NODE_VERSION" \
+    "pnpm@$PNPM_VERSION" \
+    "java@$JAVA_VERSION"
 }
 
 install_rust() {
@@ -78,13 +74,15 @@ main() {
   link_file "$DOTFILES_DIR/config/zsh/zshenv" "$HOME/.zshenv"
   link_file "$DOTFILES_DIR/config/zsh/profile" "$HOME/.profile"
   link_file "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
+  link_file "$DOTFILES_DIR/config/alacritty/alacritty.toml" "$HOME/.config/alacritty/alacritty.toml"
+  link_file "$DOTFILES_DIR/config/alacritty/themes/ayu_mirage.toml" "$HOME/.config/alacritty/themes/ayu_mirage.toml"
   link_file "$DOTFILES_DIR/config/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
   link_file "$DOTFILES_DIR/config/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
   link_file "$DOTFILES_DIR/config/git/gitconfig" "$HOME/.gitconfig"
   link_file "$DOTFILES_DIR/config/ssh/config" "$HOME/.ssh/config"
 
   install_homebrew
-  install_nvm
+  install_mise_tools
   install_rust
 
   log "done"

@@ -11,8 +11,8 @@ brew "zsh-autocomplete"
 brew "zellij"
 
 # Development runtimes and package managers
-# Node.js and its bundled npm are installed through nvm in install.sh.
-brew "openjdk@17"
+# Node.js, npm, pnpm, and Java are installed through mise in install.sh.
+brew "mise"
 brew "python@3.14"
 
 # Media, documents, and research utilities
@@ -28,4 +28,5 @@ cask "font-noto-serif-cjk-jp"
 cask "font-roboto-mono-nerd-font"
 
 # CLI/app casks currently managed by Homebrew
+cask "alacritty"
 cask "codex"
