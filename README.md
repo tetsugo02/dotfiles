@@ -29,14 +29,24 @@ cd ~/dotfiles
 
 GitHub の SSH 鍵をまだ用意していない場合は HTTPS で clone し、必要に応じて後から remote URL を変更してください。
 
+実行時に Alacritty と Ghostty のどちらを導入するか選択します．入力を受け付けない環境では，次のように指定してください．
+
+```sh
+DOTFILES_TERMINAL=ghostty ./install.sh
+```
+
+`DOTFILES_TERMINAL=alacritty` も指定できます．選択したターミナルの設定だけをリンクし，既存のアプリや他方の設定は削除しません．Ghostty を選んだ場合，`ghostty@tip` が既に入っていれば競合する通常版のインストールを省きます．
+
 ## セットアップ全体の流れ
 
 `install.sh` は次の順番で処理します。
 
-1. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
-2. `Brewfile` に記載された CLI、開発環境、フォントを Homebrew で導入する
-3. mise 経由で Node.js、npm、pnpm、Java の環境を準備する
-4. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
+1. Alacritty と Ghostty のどちらを導入するか選択する
+2. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
+3. `Brewfile` に記載された CLI，開発環境，フォントを Homebrew で導入する
+4. 選択したターミナルを Homebrew で導入する
+5. mise 経由で Node.js，npm，pnpm，Java の環境を準備する
+6. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
 
 リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
 
@@ -70,8 +80,14 @@ Rust も新しい Mac へ完全自動では導入されません。必要な場�
 | `tree` | ディレクトリ構造の表示 |
 | `starship` | シェルプロンプト |
 | `zsh-autocomplete` | zsh の入力補完 |
-| `alacritty` | GPU を利用するターミナルエミュレータ |
 | `zellij` | ターミナルワークスペース／マルチプレクサ |
+
+### 選択するターミナル
+
+| ツール | 導入方法 |
+| --- | --- |
+| `alacritty` | セットアップで選択した場合に cask を導入 |
+| `ghostty` | セットアップで選択した場合に cask を導入．`ghostty@tip` が既にあればそのまま利用 |
 
 ### メディア・文書・開発支援
 
@@ -100,12 +116,15 @@ Rust も新しい Mac へ完全自動では導入されません。必要な場�
 | `config/starship/starship.toml` | `~/.config/starship.toml` | Starship の表示設定 |
 | `config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty の表示、フォント、キー操作設定 |
 | `config/alacritty/themes/ayu_mirage.toml` | `~/.config/alacritty/themes/ayu_mirage.toml` | Alacritty の Ayu Mirage カラーテーマ |
+| `config/ghostty/config` | `~/.config/ghostty/config` | Ghostty のフォント，Ayu Mirage 配色，初期サイズ，カーソル，キー操作設定 |
 | `config/zellij/config.kdl` | `~/.config/zellij/config.kdl` | Zellij のモードとキーバインド |
 | `config/opencode/opencode.json` | `~/.config/opencode/opencode.json` | LiteLLM プロバイダーとモデル設定 |
 | `config/git/gitconfig` | `~/.gitconfig` | Git のユーザー名とメールアドレス |
 | `config/ssh/config` | `~/.ssh/config` | SSH ホスト、鍵、ProxyJump などの接続設定 |
 
 zsh では `ls --color` と、接続先へ `TERM=xterm-256color` を渡す `ssh` alias も設定します。
+
+Alacritty と Ghostty の設定は，選択した方だけをリンクします．Ghostty のスクロールバックはバイト単位のため，Alacritty の10万行と同じ行数にはなりません．
 
 ## PATH だけを設定する外部環境
 

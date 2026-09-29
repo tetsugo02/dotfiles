@@ -27,6 +27,6 @@ cask "font-noto-sans-cjk-jp"
 cask "font-noto-serif-cjk-jp"
 cask "font-roboto-mono-nerd-font"
 
-# CLI/app casks currently managed by Homebrew
-cask "alacritty"
+# Terminal cask is selected by install.sh.
+# Other CLI/app casks currently managed by Homebrew
 cask "codex"
