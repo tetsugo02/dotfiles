@@ -6,7 +6,6 @@ BACKUP_SUFFIX="backup.$(date +%Y%m%d%H%M%S)"
 NODE_VERSION="24.18.0"
 PNPM_VERSION="11.15.0"
 JAVA_VERSION="temurin-25.0.3+9.0.LTS"
-HERDR_VERSION="0.9.4"
 PYTHON_VERSION="3.14"
 NERD_FONT_VERSION="v3.5.1"
 TERMINAL_APP="${DOTFILES_TERMINAL:-}"
@@ -273,27 +272,39 @@ install_uv_linux() {
   uv python install "$PYTHON_VERSION"
 }
 
-install_npm_tools_linux() {
-  if ! command -v mise >/dev/null 2>&1; then
-    log "mise is not installed; skipping npm-based tools (repomix, codex)"
-    return
+install_agent_clis() {
+  if command -v codex >/dev/null 2>&1; then
+    log "codex is already installed"
+  else
+    log "installing codex"
+    curl -fsSL https://chatgpt.com/codex/install.sh | sh
   fi
 
-  log "installing repomix and codex via npm"
-  mise exec -- npm install -g repomix @openai/codex
+  if command -v claude >/dev/null 2>&1; then
+    log "claude (Claude Code) is already installed"
+  else
+    log "installing Claude Code"
+    curl -fsSL https://claude.ai/install.sh | bash
+  fi
+
+  if command -v herdr >/dev/null 2>&1; then
+    log "herdr is already installed"
+  else
+    log "installing herdr"
+    curl -fsSL https://herdr.dev/install.sh | sh
+  fi
 }
 
 install_mise_tools() {
   if ! command -v mise >/dev/null 2>&1; then
-    log "mise is not installed; skipping Node.js, pnpm, Java, and herdr setup"
+    log "mise is not installed; skipping Node.js, pnpm, and Java setup"
     return
   fi
 
   mise use --global --pin \
     "node@$NODE_VERSION" \
     "pnpm@$PNPM_VERSION" \
-    "java@$JAVA_VERSION" \
-    "herdr@$HERDR_VERSION"
+    "java@$JAVA_VERSION"
 }
 
 install_rust() {
@@ -334,10 +345,7 @@ main() {
   install_terminal
   install_mise_tools
   install_rust
-
-  if [ "$OS_TYPE" = "linux" ]; then
-    install_npm_tools_linux
-  fi
+  install_agent_clis
 
   log "done"
 }
