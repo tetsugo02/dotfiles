@@ -1,16 +1,18 @@
 # dotfiles
 
-macOS 向けの個人用開発環境をセットアップする dotfiles です。
+macOS と Linux（Ubuntu）向けの個人用開発環境をセットアップする dotfiles です。
 
-`install.sh` を実行すると、Homebrew パッケージの導入、Node.js・Java・Rust 環境の準備、各種設定ファイルのシンボリックリンク作成をまとめて行います。
+`install.sh` を実行すると、パッケージの導入（macOS は Homebrew、Ubuntu は apt を中心に利用）、Node.js・Python・Java・Rust 環境の準備、各種設定ファイルのシンボリックリンク作成をまとめて行います。
 
 ## 対象環境
 
-- macOS（Homebrew のパスは Apple Silicon Mac の `/opt/homebrew` を前提）
-- zsh
-- Git と Homebrew を導入済みであること
+- macOS（Homebrew のパスは Apple Silicon Mac の `/opt/homebrew` を前提）または Ubuntu（apt が使えること）
+- zsh（Ubuntu では `install.sh` が zsh を導入し、既定シェルに切り替えます）
+- Git を導入済みであること（macOS は追加で Homebrew、Ubuntu は `sudo` が使えること）
 
 ## インストール方法
+
+### macOS
 
 新しい Mac では、先に Xcode Command Line Tools と Homebrew を導入します。
 
@@ -19,7 +21,13 @@ xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-その後、このリポジトリを取得してセットアップを実行します。
+### Ubuntu
+
+Git と `sudo` が使えれば追加の準備は不要です。zsh はまだ入れていなくても構いません（`install.sh` が導入し、既定シェルに切り替えます）。
+
+### 共通
+
+このリポジトリを取得してセットアップを実行します。
 
 ```sh
 git clone git@github.com:tetsugo02/dotfiles.git ~/dotfiles
@@ -29,28 +37,31 @@ cd ~/dotfiles
 
 GitHub の SSH 鍵をまだ用意していない場合は HTTPS で clone し、必要に応じて後から remote URL を変更してください。
 
-実行時に Alacritty と Ghostty のどちらを導入するか選択します．入力を受け付けない環境では，次のように指定してください．
+実行時にまず macOS / Linux のどちらを対象にするか、続けて Alacritty と Ghostty のどちらを導入するかを選択します。入力を受け付けない環境（CI など）では、次のように環境変数で指定してください。
 
 ```sh
-DOTFILES_TERMINAL=ghostty ./install.sh
+DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty ./install.sh
 ```
 
-`DOTFILES_TERMINAL=alacritty` も指定できます．選択したターミナルの設定だけをリンクし，既存のアプリや他方の設定は削除しません．Ghostty を選んだ場合，`ghostty@tip` が既に入っていれば競合する通常版のインストールを省きます．
+`DOTFILES_OS` は `macos` か `linux`、`DOTFILES_TERMINAL` は `alacritty` か `ghostty` を指定できます。非対話シェルで `DOTFILES_OS` を省略した場合は `uname -s` から自動判定します。選択したターミナルの設定だけをリンクし，既存のアプリや他方の設定は削除しません．Ghostty を選んだ場合，`ghostty@tip`（macOS）が既に入っていれば競合する通常版のインストールを省きます。
 
 ## セットアップ全体の流れ
 
 `install.sh` は次の順番で処理します。
 
-1. Alacritty と Ghostty のどちらを導入するか選択する
-2. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
-3. `Brewfile` に記載された CLI，開発環境，フォントを Homebrew で導入する
-4. 選択したターミナルを Homebrew で導入する
-5. mise 経由で Node.js，npm，pnpm，Java の環境を準備する
-6. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
+1. macOS と Linux (Ubuntu) のどちらを対象にするか選択する
+2. Alacritty と Ghostty のどちらを導入するか選択する
+3. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
+4. macOS は `Brewfile` に記載された CLI とフォントを Homebrew で導入する。Ubuntu は zsh を導入して既定シェルに切り替えたうえで、apt パッケージ、GitHub CLI の公式リポジトリ、Nerd Font、zsh-autocomplete、starship をそれぞれの方法で導入する
+5. 選択したターミナルを導入する（macOS は Homebrew cask、Ubuntu は apt）
+6. Ubuntu では mise と uv を導入する（未導入の場合）
+7. mise 経由で Node.js，npm，pnpm，Java，herdr の環境を準備する
+8. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
+9. Ubuntu では Node.js 経由で repomix と codex を npm グローバル導入する
 
 リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
 
-Homebrew が未導入の場合、Homebrew 部分は案内を表示してスキップします。mise は Homebrew から導入します。rustup 自体は自動導入しません。
+macOS で Homebrew が未導入の場合、Homebrew 部分は案内を表示してスキップします。rustup 自体は自動導入しません。
 
 ## 言語・ランタイム環境
 
@@ -59,45 +70,48 @@ Homebrew が未導入の場合、Homebrew 部分は案内を表示してスキ�
 | Node.js | 24.18.0 / mise | mise のグローバル既定として導入 |
 | npm | Node.js 24.18.0 同梱版 | Node.js と一緒に mise 管理下へ導入。npm 単体の直接インストールはしない |
 | pnpm | 11.15.0 / mise | mise のグローバル既定として導入 |
-| Python | 3.14 / Homebrew | `python@3.14` を導入 |
+| herdr | 0.9.4 / mise | ターミナルマルチプレクサ（旧 zellij の代替）。mise のグローバル既定として導入し、macOS / Ubuntu で同じ方式を使う |
+| Python | macOS: 3.14 / Homebrew、Ubuntu: 3.14 / uv | Ubuntu では `uv python install` でバージョンを管理する（uv 自体も未導入なら公式インストーラーで導入） |
 | Java | Temurin 25.0.3 LTS / mise | mise のグローバル既定として導入し、`JAVA_HOME` を自動設定 |
 | Rust | stable / rustup | rustup が既に導入済みの場合のみ toolchain を導入し、既定に設定 |
 
-Node.js、npm、pnpm、Java は mise の環境から利用します。mise の shell activation により、Java の切り替え時には `JAVA_HOME` も更新されます。Homebrew 版 Node.js や Java は導入しません。
+Node.js、npm、pnpm、Java、herdr は mise の環境から利用します。mise の shell activation により、Java の切り替え時には `JAVA_HOME` も更新されます。Homebrew 版 Node.js や Java は導入しません。
 
-Rust も新しい Mac へ完全自動では導入されません。必要な場合は先に [rustup](https://rustup.rs/) を導入し、もう一度 `./install.sh` を実行してください。
+Rust は自動導入されません。必要な場合は先に [rustup](https://rustup.rs/) を導入し、もう一度 `./install.sh` を実行してください。
 
-## Homebrew で導入する環境とツール
+herdr のキーバインドなどをカスタマイズしたい場合は `herdr --default-config > ~/.config/herdr/config.toml` でデフォルト設定を書き出して編集してください（このリポジトリでは既定設定のまま使う前提で、設定ファイルは管理していません）。
+
+## 導入するツール（OS 別）
 
 ### 基本 CLI
 
-| ツール | 用途 |
-| --- | --- |
-| `git` | バージョン管理 |
-| `gh` | GitHub CLI |
-| `gnupg` | 署名・暗号化 |
-| `ripgrep` | 高速なテキスト検索 |
-| `tree` | ディレクトリ構造の表示 |
-| `starship` | シェルプロンプト |
-| `zsh-autocomplete` | zsh の入力補完 |
-| `zellij` | ターミナルワークスペース／マルチプレクサ |
+| ツール | 用途 | macOS | Ubuntu |
+| --- | --- | --- | --- |
+| `zsh` | シェル本体 | OS 標準 | apt で導入し既定シェルに切り替え |
+| `git` | バージョン管理 | Homebrew | apt |
+| `gh` | GitHub CLI | Homebrew | 公式 apt リポジトリ（cli.github.com） |
+| `gnupg` | 署名・暗号化 | Homebrew | apt |
+| `ripgrep` | 高速なテキスト検索 | Homebrew | apt |
+| `tree` | ディレクトリ構造の表示 | Homebrew | apt |
+| `starship` | シェルプロンプト | Homebrew | 公式インストーラー（starship.rs/install.sh） |
+| `zsh-autocomplete` | zsh の入力補完 | Homebrew | `~/.zsh-autocomplete` へ git clone |
 
 ### 選択するターミナル
 
-| ツール | 導入方法 |
-| --- | --- |
-| `alacritty` | セットアップで選択した場合に cask を導入 |
-| `ghostty` | セットアップで選択した場合に cask を導入．`ghostty@tip` が既にあればそのまま利用 |
+| ツール | macOS | Ubuntu |
+| --- | --- | --- |
+| `alacritty` | セットアップで選択した場合に Homebrew cask を導入 | セットアップで選択した場合に apt で導入（`universe` リポジトリが必要な場合あり） |
+| `ghostty` | セットアップで選択した場合に Homebrew cask を導入．`ghostty@tip` が既にあればそのまま利用 | セットアップで選択した場合に apt で導入（Ubuntu 26.04 未満では `universe` の有効化や PPA が必要な場合あり） |
 
 ### メディア・文書・開発支援
 
-| ツール | 用途 |
-| --- | --- |
-| `ffmpeg` | 音声・動画処理 |
-| `imagemagick` | 画像処理 |
-| `mole` | プロジェクト固有の CLI |
-| `repomix` | リポジトリ内容の集約 |
-| `codex` | Codex CLI／アプリ |
+| ツール | 用途 | macOS | Ubuntu |
+| --- | --- | --- | --- |
+| `ffmpeg` | 音声・動画処理 | Homebrew | apt |
+| `imagemagick` | 画像処理 | Homebrew | apt |
+| `mole` | Mac クリーンアップ用 CLI | Homebrew | 非対応（macOS 専用ツールのため） |
+| `repomix` | リポジトリ内容の集約 | Homebrew | npm グローバル導入（mise 管理の Node.js を使用） |
+| `codex` | Codex CLI | Homebrew cask | npm グローバル導入（`@openai/codex`） |
 
 ### フォント
 
@@ -105,19 +119,20 @@ Rust も新しい Mac へ完全自動では導入されません。必要な場�
 - Noto Serif CJK JP
 - Roboto Mono Nerd Font
 
+macOS は Homebrew cask（`font-noto-sans-cjk-jp` など）で導入します。Ubuntu では Noto CJK を apt パッケージ（`fonts-noto-cjk` / `fonts-noto-cjk-extra`）で、Roboto Mono Nerd Font を GitHub リリースから取得して `~/.local/share/fonts` に展開し、`fc-cache` でキャッシュを更新します。
+
 ## 配置される設定
 
 | リポジトリ内のファイル | リンク先 | 内容 |
 | --- | --- | --- |
 | `config/zsh/zshrc` | `~/.zshrc` | 補完、Starship、mise、PATH、alias、秘密情報の読み込み |
-| `config/zsh/zprofile` | `~/.zprofile` | Homebrew の shell environment |
+| `config/zsh/zprofile` | `~/.zprofile` | Homebrew の shell environment（Homebrew が無い環境では何もしない） |
 | `config/zsh/zshenv` | `~/.zshenv` | Cargo 環境の読み込み |
 | `config/zsh/profile` | `~/.profile` | ローカル CLI と Cargo 環境の読み込み |
 | `config/starship/starship.toml` | `~/.config/starship.toml` | Starship の表示設定 |
 | `config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty の表示、フォント、キー操作設定 |
 | `config/alacritty/themes/ayu_mirage.toml` | `~/.config/alacritty/themes/ayu_mirage.toml` | Alacritty の Ayu Mirage カラーテーマ |
 | `config/ghostty/config` | `~/.config/ghostty/config` | Ghostty のフォント，Ayu Mirage 配色，初期サイズ，カーソル，キー操作設定 |
-| `config/zellij/config.kdl` | `~/.config/zellij/config.kdl` | Zellij のモードとキーバインド |
 | `config/opencode/opencode.json` | `~/.config/opencode/opencode.json` | LiteLLM プロバイダーとモデル設定 |
 | `config/git/gitconfig` | `~/.gitconfig` | Git のユーザー名とメールアドレス |
 | `config/ssh/config` | `~/.ssh/config` | SSH ホスト、鍵、ProxyJump などの接続設定 |
@@ -126,20 +141,23 @@ zsh では `ls --color` と、接続先へ `TERM=xterm-256color` を渡す `ssh`
 
 Alacritty と Ghostty の設定は，選択した方だけをリンクします．Ghostty のスクロールバックはバイト単位のため，Alacritty の10万行と同じ行数にはなりません．
 
+herdr（ターミナルマルチプレクサ）は設定ファイルを管理せず、既定のキーバインドのまま利用する前提です。
+
 ## PATH だけを設定する外部環境
 
 以下は `install.sh` や `Brewfile` ではインストールせず、対象が既に存在する場合だけ利用できるようにする設定です。ディレクトリまたは設定ファイルが存在しなければ何も変更しないため、未導入の環境でもエラーにはなりません。
 
 | 対象 | 設定 | 現在の自動セットアップに必要か | 残している理由 |
 | --- | --- | --- | --- |
-| uv などのローカル CLI | `~/.local/bin/env` があれば読み込む | 不要 | uv の standalone installer などが作成する環境設定を利用するため。uv 自体はこのリポジトリでは導入しない |
+| uv などのローカル CLI | `~/.local/bin/env` があれば読み込む | Ubuntu では必要（uv は install.sh が導入する） | uv の standalone installer が作成する環境設定を利用するため |
 | Pixi | `~/.pixi/bin` を PATH に追加 | 不要 | Pixi を別途導入したマシンでコマンドを利用するため |
 | 個人用 CLI | `~/my_cli` を PATH に追加 | 不要 | 自作スクリプトや個人用コマンドを直接実行するため |
 | Antigravity | `~/.antigravity/antigravity/bin` を PATH に追加 | 不要 | Antigravity を別途導入した場合に実行ファイルを利用するため |
 | opencode | `~/.opencode/bin` を PATH に追加 | opencode を使わない場合は不要 | opencode の独自インストーラーで配置された実行ファイルを利用するため。設定ファイルだけはこのリポジトリから配置する |
 | Cargo | `~/.cargo/env` があれば読み込む | Rust を使う場合は必要 | rustup が設定する Cargo と Rust toolchain の PATH を有効化するため |
+| `~/.local/bin` | PATH に追加（zshrc の `path_prepend`） | Ubuntu では必要（uv・starship・mise などの既定インストール先） | 公式インストーラーが配置する実行ファイルを両 OS で共通に使えるようにするため |
 
-したがって、現在の自動インストールだけに絞れば uv、Pixi、個人用 CLI、Antigravity、opencode の PATH 設定は必須ではありません。一方、存在確認付きで副作用が小さく、別の方法で導入済みのツールを複数の Mac でそのまま利用できるため、互換用の設定として残しています。今後これらを使わないことが確定した場合は、対応する行を `config/zsh/zshrc` または `config/zsh/profile` から削除できます。
+したがって、現在の自動インストールだけに絞れば Pixi、個人用 CLI、Antigravity、opencode の PATH 設定は必須ではありません。一方、存在確認付きで副作用が小さく、別の方法で導入済みのツールを複数のマシンでそのまま利用できるため、互換用の設定として残しています。今後これらを使わないことが確定した場合は、対応する行を `config/zsh/zshrc` または `config/zsh/profile` から削除できます。
 
 ## 秘密情報
 
@@ -163,11 +181,13 @@ cp config/zsh/secrets.zsh.example ~/.config/zsh/secrets.zsh
 - `gh auth login -h github.com` で GitHub CLI を認証する
 - rustup と Rust が必要なら rustup を先に導入する
 - App Store や各ベンダーのアプリへログインする
-- 必要に応じて Homebrew ディレクトリの所有者を確認する
+- 必要に応じて Homebrew ディレクトリの所有者を確認する（macOS）
 
 ```sh
 sudo chown -R "$USER":admin /opt/homebrew
 ```
+
+- Ubuntu では `install.sh` が `sudo apt-get` と `chsh` を実行するため、パスワード入力を求められることがあります
 
 ## 設定変更後の反映
 

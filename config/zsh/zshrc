@@ -2,6 +2,8 @@ alias ls="ls --color"
 
 if [ -f /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
   source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+elif [ -f "$HOME/.zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]; then
+  source "$HOME/.zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 if command -v starship >/dev/null 2>&1; then
@@ -18,6 +20,7 @@ path_prepend() {
   esac
 }
 
+path_prepend "$HOME/.local/bin"
 path_prepend "$HOME/.pixi/bin"
 path_prepend "$HOME/.antigravity/antigravity/bin"
 path_prepend "$HOME/.opencode/bin"
