@@ -8,7 +8,7 @@ brew "ripgrep"
 brew "tree"
 brew "starship"
 brew "zsh-autocomplete"
-# herdr (terminal multiplexer) is installed cross-platform via mise in install.sh.
+# herdr (terminal multiplexer) is installed cross-platform via its official curl installer in install.sh.
 
 # Development runtimes and package managers
 # Node.js, npm, pnpm, and Java are installed through mise in install.sh.
@@ -20,7 +20,6 @@ brew "ffmpeg"
 brew "imagemagick"
 # Project-specific tools currently installed
 brew "mole"
-brew "repomix"
 
 # Fonts
 cask "font-noto-sans-cjk-jp"
@@ -28,5 +27,4 @@ cask "font-noto-serif-cjk-jp"
 cask "font-roboto-mono-nerd-font"
 
 # Terminal cask is selected by install.sh.
-# Other CLI/app casks currently managed by Homebrew
-cask "codex"
+# Codex and Claude Code are installed cross-platform via their official curl installers in install.sh.

@@ -55,9 +55,9 @@ DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty ./install.sh
 4. macOS は `Brewfile` に記載された CLI とフォントを Homebrew で導入する。Ubuntu は zsh を導入して既定シェルに切り替えたうえで、apt パッケージ、GitHub CLI の公式リポジトリ、Nerd Font、zsh-autocomplete、starship をそれぞれの方法で導入する
 5. 選択したターミナルを導入する（macOS は Homebrew cask、Ubuntu は apt）
 6. Ubuntu では mise と uv を導入する（未導入の場合）
-7. mise 経由で Node.js，npm，pnpm，Java，herdr の環境を準備する
+7. mise 経由で Node.js，npm，pnpm，Java の環境を準備する
 8. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
-9. Ubuntu では Node.js 経由で repomix と codex を npm グローバル導入する
+9. codex，Claude Code，herdr をそれぞれの公式 curl インストーラーで導入する（macOS / Ubuntu 共通）
 
 リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
 
@@ -70,16 +70,15 @@ macOS で Homebrew が未導入の場合、Homebrew 部分は案内を表示し�
 | Node.js | 24.18.0 / mise | mise のグローバル既定として導入 |
 | npm | Node.js 24.18.0 同梱版 | Node.js と一緒に mise 管理下へ導入。npm 単体の直接インストールはしない |
 | pnpm | 11.15.0 / mise | mise のグローバル既定として導入 |
-| herdr | 0.9.4 / mise | ターミナルマルチプレクサ（旧 zellij の代替）。mise のグローバル既定として導入し、macOS / Ubuntu で同じ方式を使う |
 | Python | macOS: 3.14 / Homebrew、Ubuntu: 3.14 / uv | Ubuntu では `uv python install` でバージョンを管理する（uv 自体も未導入なら公式インストーラーで導入） |
 | Java | Temurin 25.0.3 LTS / mise | mise のグローバル既定として導入し、`JAVA_HOME` を自動設定 |
 | Rust | stable / rustup | rustup が既に導入済みの場合のみ toolchain を導入し、既定に設定 |
 
-Node.js、npm、pnpm、Java、herdr は mise の環境から利用します。mise の shell activation により、Java の切り替え時には `JAVA_HOME` も更新されます。Homebrew 版 Node.js や Java は導入しません。
+Node.js、npm、pnpm、Java は mise の環境から利用します。mise の shell activation により、Java の切り替え時には `JAVA_HOME` も更新されます。Homebrew 版 Node.js や Java は導入しません。
 
 Rust は自動導入されません。必要な場合は先に [rustup](https://rustup.rs/) を導入し、もう一度 `./install.sh` を実行してください。
 
-herdr のキーバインドなどをカスタマイズしたい場合は `herdr --default-config > ~/.config/herdr/config.toml` でデフォルト設定を書き出して編集してください（このリポジトリでは既定設定のまま使う前提で、設定ファイルは管理していません）。
+codex・Claude Code・herdr は、公式ドキュメントが一番に案内している curl インストーラー（`chatgpt.com/codex/install.sh`、`claude.ai/install.sh`、`herdr.dev/install.sh`）で、macOS / Ubuntu 共通に導入します。いずれもパッケージマネージャーを介さず自己更新するため、Homebrew や npm では管理しません。herdr のキーバインドなどをカスタマイズしたい場合は `herdr --default-config > ~/.config/herdr/config.toml` でデフォルト設定を書き出して編集してください（このリポジトリでは既定設定のまま使う前提で、設定ファイルは管理していません）。
 
 ## 導入するツール（OS 別）
 
@@ -110,8 +109,16 @@ herdr のキーバインドなどをカスタマイズしたい場合は `herdr 
 | `ffmpeg` | 音声・動画処理 | Homebrew | apt |
 | `imagemagick` | 画像処理 | Homebrew | apt |
 | `mole` | Mac クリーンアップ用 CLI | Homebrew | 非対応（macOS 専用ツールのため） |
-| `repomix` | リポジトリ内容の集約 | Homebrew | npm グローバル導入（mise 管理の Node.js を使用） |
-| `codex` | Codex CLI | Homebrew cask | npm グローバル導入（`@openai/codex`） |
+
+### AI コーディングエージェント CLI
+
+公式が一番に案内している curl インストーラーを使い、macOS / Ubuntu で同じ方法で導入します（パッケージマネージャー経由にすると自己更新の仕組みと競合するため）。
+
+| ツール | 用途 | 導入方法（共通） |
+| --- | --- | --- |
+| `codex` | Codex CLI | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh` |
+| `claude` (Claude Code) | Claude Code CLI | `curl -fsSL https://claude.ai/install.sh \| bash` |
+| `herdr` | ターミナルマルチプレクサ（旧 zellij の代替） | `curl -fsSL https://herdr.dev/install.sh \| sh` |
 
 ### フォント
 
