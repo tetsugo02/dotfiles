@@ -8,6 +8,7 @@ PNPM_VERSION="11.15.0"
 JAVA_VERSION="temurin-25.0.3+9.0.LTS"
 PYTHON_VERSION="3.14"
 NERD_FONT_VERSION="v3.5.1"
+ZSH_AUTOCOMPLETE_VERSION="26.08.04"
 TERMINAL_APP="${DOTFILES_TERMINAL:-}"
 OS_TYPE="${DOTFILES_OS:-}"
 
@@ -201,12 +202,16 @@ install_zsh_autocomplete_linux() {
   local target="$HOME/.zsh-autocomplete"
 
   if [ -d "$target" ]; then
-    log "zsh-autocomplete is already installed"
-    return
+    if [ "$(git -C "$target" describe --tags 2>/dev/null)" = "$ZSH_AUTOCOMPLETE_VERSION" ]; then
+      log "zsh-autocomplete $ZSH_AUTOCOMPLETE_VERSION is already installed"
+      return
+    fi
+    log "zsh-autocomplete at $target is not pinned to $ZSH_AUTOCOMPLETE_VERSION; re-cloning"
+    rm -rf "$target"
   fi
 
-  log "cloning zsh-autocomplete"
-  git clone --depth 1 https://github.com/marlonrichert/zsh-autocomplete.git "$target"
+  log "cloning zsh-autocomplete $ZSH_AUTOCOMPLETE_VERSION"
+  git clone --branch "$ZSH_AUTOCOMPLETE_VERSION" --depth 1 https://github.com/marlonrichert/zsh-autocomplete.git "$target"
 }
 
 install_starship_linux() {

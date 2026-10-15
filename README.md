@@ -93,7 +93,7 @@ codex・Claude Code・herdr は、公式ドキュメントが一番に案内し�
 | `ripgrep` | 高速なテキスト検索 | Homebrew | apt |
 | `tree` | ディレクトリ構造の表示 | Homebrew | apt |
 | `starship` | シェルプロンプト | Homebrew | 公式インストーラー（starship.rs/install.sh） |
-| `zsh-autocomplete` | zsh の入力補完 | Homebrew | `~/.zsh-autocomplete` へ git clone |
+| `zsh-autocomplete` | zsh の入力補完 | Homebrew | `~/.zsh-autocomplete` へタグ指定で git clone（Homebrew の stable 版と同じリリースタグを使用） |
 
 ### 選択するターミナル
 
