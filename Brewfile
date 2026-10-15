@@ -8,7 +8,7 @@ brew "ripgrep"
 brew "tree"
 brew "starship"
 brew "zsh-autocomplete"
-brew "zellij"
+# herdr (terminal multiplexer) is installed cross-platform via mise in install.sh.
 
 # Development runtimes and package managers
 # Node.js, npm, pnpm, and Java are installed through mise in install.sh.
