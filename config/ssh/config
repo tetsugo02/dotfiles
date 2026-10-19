@@ -22,6 +22,17 @@ Host server1
     port 10022
     IdentityFile ~/.ssh/id_rsa_kenkyushitsu
 
+Host murata-lab-spark
+	HostName spark-cf69.local
+    User murata-lab
+    IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+
+Host murata-lab-gf-rtx3080-6
+	HostName gf-rtx3080-6.local
+	User murata-lab
+    IdentityFile ~/.ssh/id_rsa_kenkyushitsu
+	ProxyCommand ssh -CW %h:%p server1
+	StrictHostKeyChecking no
 
 Host A5000_server
 	HostName rtx-a5000.local
