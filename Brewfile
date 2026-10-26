@@ -27,4 +27,5 @@ cask "font-noto-serif-cjk-jp"
 cask "font-roboto-mono-nerd-font"
 
 # Terminal cask is selected by install.sh.
+cask "stablyai/orca/orca"
 # Codex and Claude Code are installed cross-platform via their official curl installers in install.sh.

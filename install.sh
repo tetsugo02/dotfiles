@@ -8,6 +8,7 @@ PNPM_VERSION="11.15.0"
 JAVA_VERSION="temurin-25.0.3+9.0.LTS"
 PYTHON_VERSION="3.14"
 NERD_FONT_VERSION="v3.5.1"
+ORCA_VERSION="1.4.240"
 TERMINAL_APP="${DOTFILES_TERMINAL:-}"
 OS_TYPE="${DOTFILES_OS:-}"
 
@@ -248,6 +249,30 @@ install_apt_packages() {
   install_starship_linux
 }
 
+install_orca_linux() (
+  if [ "$(dpkg-query -W -f='${Status}' orca-ide 2>/dev/null || true)" = 'install ok installed' ]; then
+    log "Orca is already installed"
+    return
+  fi
+
+  local arch tmp_dir package
+  arch="$(dpkg --print-architecture)"
+  case "$arch" in
+    amd64|arm64) ;;
+    *) log "Orca does not provide a .deb for $arch; skipping installation"; return ;;
+  esac
+
+  tmp_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmp_dir"' EXIT
+  package="$tmp_dir/orca-ide_${ORCA_VERSION}_${arch}.deb"
+  log "installing Orca $ORCA_VERSION ($arch)"
+  curl -fsSL "https://github.com/stablyai/orca/releases/download/v${ORCA_VERSION}/orca-ide_${ORCA_VERSION}_${arch}.deb" -o "$package"
+  # Allow apt's _apt user to read the downloaded package.
+  chmod 755 "$tmp_dir"
+  chmod 644 "$package"
+  sudo apt-get install -y "$package"
+)
+
 install_mise_cli_linux() {
   if command -v mise >/dev/null 2>&1; then
     log "mise is already installed"
@@ -338,6 +363,7 @@ main() {
       ;;
     linux)
       install_apt_packages
+      install_orca_linux
       install_mise_cli_linux
       install_uv_linux
       ;;

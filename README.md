@@ -59,6 +59,8 @@ DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty ./install.sh
 8. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
 9. codex，Claude Code，herdr をそれぞれの公式 curl インストーラーで導入する（macOS / Ubuntu 共通）
 
+Orca も導入します．macOS は手順4の Homebrew bundle，Ubuntu は apt パッケージの導入後に公式 `.deb` を使用します．
+
 リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
 
 macOS で Homebrew が未導入の場合、Homebrew 部分は案内を表示してスキップします。rustup 自体は自動導入しません。
@@ -119,6 +121,25 @@ codex・Claude Code・herdr は、公式ドキュメントが一番に案内し�
 | `codex` | Codex CLI | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh` |
 | `claude` (Claude Code) | Claude Code CLI | `curl -fsSL https://claude.ai/install.sh \| bash` |
 | `herdr` | ターミナルマルチプレクサ（旧 zellij の代替） | `curl -fsSL https://herdr.dev/install.sh \| sh` |
+
+### Orca
+
+[Orca](https://www.onorca.dev/) は，複数のコーディングエージェントを並行して動かすデスクトップ開発環境です．[公式インストール手順](https://www.onorca.dev/docs/install)に従い，次の方法で導入します．
+
+| OS | 導入方法 |
+| --- | --- |
+| macOS | `Brewfile` の `stablyai/orca/orca` cask を Homebrew で導入 |
+| Ubuntu | 公式 GitHub Releases の `.deb` を取得し，`sudo apt-get install -y` で依存関係とともに導入 |
+
+macOS で Orca だけを導入する場合は，次を実行します．
+
+```sh
+brew install --cask stablyai/orca/orca
+```
+
+Ubuntu は `install.sh` の `install_orca_linux` が amd64／arm64 を自動判定します．導入バージョンは `ORCA_VERSION`（現在 `1.4.240`）で固定し，導入済みの場合はスキップします．その他のアーキテクチャでは案内を表示してスキップします．GNOME のスクリーンリーダーとの名前の競合を避けるため，Linux 版の起動コマンドは `orca-ide` です．
+
+Ubuntu の更新はアプリ内の更新案内に従ってパッケージを導入します．dotfiles で新規導入する版を更新する場合は，`install.sh` の `ORCA_VERSION` も更新してください．macOS では `brew upgrade --cask orca` で更新できます．
 
 ### フォント
 
