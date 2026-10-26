@@ -2,7 +2,7 @@
 
 macOS と Linux（Ubuntu）向けの個人用開発環境をセットアップする dotfiles です。
 
-`install.sh` を実行すると、パッケージの導入（macOS は Homebrew、Ubuntu は apt を中心に利用）、Node.js・Python・Java・Rust 環境の準備、各種設定ファイルのシンボリックリンク作成をまとめて行います。
+`install.sh` を実行すると，パッケージの導入（macOS は Homebrew，Ubuntu は apt を中心に利用），選択した言語ランタイムの準備，各種設定ファイルのシンボリックリンク作成をまとめて行います．
 
 ## 対象環境
 
@@ -40,7 +40,7 @@ GitHub の SSH 鍵をまだ用意していない場合は HTTPS で clone し、
 実行時にまず macOS / Linux のどちらを対象にするか、続けて Alacritty と Ghostty のどちらを導入するかを選択します。入力を受け付けない環境（CI など）では、次のように環境変数で指定してください。
 
 ```sh
-DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty ./install.sh
+DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty DOTFILES_RUNTIMES=node,python ./install.sh
 ```
 
 `DOTFILES_OS` は `macos` か `linux`、`DOTFILES_TERMINAL` は `alacritty` か `ghostty` を指定できます。非対話シェルで `DOTFILES_OS` を省略した場合は `uname -s` から自動判定します。選択したターミナルの設定だけをリンクし，既存のアプリや他方の設定は削除しません．Ghostty を選んだ場合，`ghostty@tip`（macOS）が既に入っていれば競合する通常版のインストールを省きます。
@@ -51,15 +51,13 @@ DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty ./install.sh
 
 1. macOS と Linux (Ubuntu) のどちらを対象にするか選択する
 2. Alacritty と Ghostty のどちらを導入するか選択する
-3. このリポジトリ内の設定ファイルをホームディレクトリへシンボリックリンクする
-4. macOS は `Brewfile` に記載された CLI とフォントを Homebrew で導入する。Ubuntu は zsh を導入して既定シェルに切り替えたうえで、apt パッケージ、GitHub CLI の公式リポジトリ、Nerd Font、zsh-autocomplete、starship をそれぞれの方法で導入する
-5. 選択したターミナルを導入する（macOS は Homebrew cask、Ubuntu は apt）
-6. Ubuntu では mise と uv を導入する（未導入の場合）
-7. mise 経由で Node.js，npm，pnpm，Java の環境を準備する
-8. rustup が既に存在する場合、Rust の stable toolchain を導入して既定にする
+3. チェックボックス形式で言語ランタイムを選択する
+4. このリポジトリ内の設定ファイルをホームディレクトリへリンクし，Codex／Claude Code の共通指示を反映する
+5. macOS は `Brewfile` の CLI，フォント，Orca を導入する．Ubuntu は apt パッケージ，GitHub CLI，Nerd Font，zsh-autocomplete，starship，Orca を導入し，zsh を既定シェルにする
+6. 選択したターミナルを導入する（macOS は Homebrew cask，Ubuntu は apt）
+7. 選択したランタイムに必要な管理ツールとランタイムを導入する
+8. Rust を選択し，rustup が既に存在する場合は stable toolchain を導入して既定にする
 9. codex，Claude Code，herdr をそれぞれの公式 curl インストーラーで導入する（macOS / Ubuntu 共通）
-
-Orca も導入します．macOS は手順4の Homebrew bundle，Ubuntu は apt パッケージの導入後に公式 `.deb` を使用します．
 
 リンク先に既存のファイルやリンクがある場合は、上書きせずに `元の名前.backup.YYYYMMDDhhmmss` へ移動します。同じリンクが既に作成済みの場合は何もしないため、`install.sh` は再実行できます。
 
@@ -67,18 +65,40 @@ macOS で Homebrew が未導入の場合、Homebrew 部分は案内を表示し�
 
 ## 言語・ランタイム環境
 
+対話セットアップでは，番号 `1`〜`4` を入力して Enter を押すとチェックが切り替わります．`a` ですべて選択，`n` ですべて解除，空の入力で Enter を押すと確定，`q` でセットアップを中止します．初期選択は Node.js と Python で，Java（JVM）と Rust は未選択です．
+
+```text
+1) [x] Node.js + npm + pnpm
+2) [x] Python
+3) [ ] Java (JVM)
+4) [ ] Rust stable (requires rustup)
+```
+
+非対話実行では `DOTFILES_RUNTIMES` の指定が必須です．`node`，`python`，`java`，`rust` をカンマで区切るか，`all`／`none` を指定します．空文字列や不正な値はエラーになります．対話実行でもこの変数を指定すると選択画面を省略できます．
+
+```sh
+# Node.js と Python のみ
+DOTFILES_OS=macos DOTFILES_TERMINAL=ghostty DOTFILES_RUNTIMES=node,python ./install.sh
+# Java のみ
+DOTFILES_OS=linux DOTFILES_TERMINAL=alacritty DOTFILES_RUNTIMES=java ./install.sh
+# ランタイムを導入しない
+DOTFILES_OS=linux DOTFILES_TERMINAL=ghostty DOTFILES_RUNTIMES=none ./install.sh
+```
+
+未選択のランタイムはインストール・更新しません．既存のランタイムやグローバル設定は削除しません．mise は Node.js または Java を選択した場合のみ，Ubuntu の uv は Python を選択した場合のみ導入します．`Brewfile` 単体では言語ランタイムを導入しません．
+
 | 言語・環境 | バージョン／方式 | セットアップ内容 |
 | --- | --- | --- |
-| Node.js | 24.18.0 / mise | mise のグローバル既定として導入 |
+| Node.js | 24.18.0 / mise | 選択時に npm・pnpm とともにグローバル既定として導入 |
 | npm | Node.js 24.18.0 同梱版 | Node.js と一緒に mise 管理下へ導入。npm 単体の直接インストールはしない |
-| pnpm | 11.15.0 / mise | mise のグローバル既定として導入 |
-| Python | macOS: 3.14 / Homebrew、Ubuntu: 3.14 / uv | Ubuntu では `uv python install` でバージョンを管理する（uv 自体も未導入なら公式インストーラーで導入） |
-| Java | Temurin 25.0.3 LTS / mise | mise のグローバル既定として導入し、`JAVA_HOME` を自動設定 |
-| Rust | stable / rustup | rustup が既に導入済みの場合のみ toolchain を導入し、既定に設定 |
+| pnpm | 11.15.0 / mise | Node.js 選択時にグローバル既定として導入 |
+| Python | macOS: 3.14 / Homebrew，Ubuntu: 3.14 / uv | 選択時のみ導入．Ubuntu では uv も必要に応じて導入 |
+| Java | Temurin 25.0.3 LTS / mise | 選択時のみグローバル既定として導入し，`JAVA_HOME` を自動設定 |
+| Rust | stable / rustup | 選択し，rustup が既に導入済みの場合のみ toolchain を導入し，既定に設定 |
 
 Node.js、npm、pnpm、Java は mise の環境から利用します。mise の shell activation により、Java の切り替え時には `JAVA_HOME` も更新されます。Homebrew 版 Node.js や Java は導入しません。
 
-Rust は自動導入されません。必要な場合は先に [rustup](https://rustup.rs/) を導入し、もう一度 `./install.sh` を実行してください。
+rustup 自体は自動導入しません．Rust が必要な場合は先に [rustup](https://rustup.rs/) を導入し，`./install.sh` で Rust を選択してください．
 
 codex・Claude Code・herdr は、公式ドキュメントが一番に案内している curl インストーラー（`chatgpt.com/codex/install.sh`、`claude.ai/install.sh`、`herdr.dev/install.sh`）で、macOS / Ubuntu 共通に導入します。いずれもパッケージマネージャーを介さず自己更新するため、Homebrew や npm では管理しません。herdr のキーバインドなどをカスタマイズしたい場合は `herdr --default-config > ~/.config/herdr/config.toml` でデフォルト設定を書き出して編集してください（このリポジトリでは既定設定のまま使う前提で、設定ファイルは管理していません）。
 
@@ -177,7 +197,7 @@ herdr（ターミナルマルチプレクサ）は設定ファイルを管理せ
 
 | 対象 | 設定 | 現在の自動セットアップに必要か | 残している理由 |
 | --- | --- | --- | --- |
-| uv などのローカル CLI | `~/.local/bin/env` があれば読み込む | Ubuntu では必要（uv は install.sh が導入する） | uv の standalone installer が作成する環境設定を利用するため |
+| uv などのローカル CLI | `~/.local/bin/env` があれば読み込む | Ubuntu で Python を選択した場合に必要（uv は install.sh が導入する） | uv の standalone installer が作成する環境設定を利用するため |
 | Pixi | `~/.pixi/bin` を PATH に追加 | 不要 | Pixi を別途導入したマシンでコマンドを利用するため |
 | 個人用 CLI | `~/my_cli` を PATH に追加 | 不要 | 自作スクリプトや個人用コマンドを直接実行するため |
 | Antigravity | `~/.antigravity/antigravity/bin` を PATH に追加 | 不要 | Antigravity を別途導入した場合に実行ファイルを利用するため |

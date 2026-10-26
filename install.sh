@@ -11,6 +11,7 @@ NERD_FONT_VERSION="v3.5.1"
 ORCA_VERSION="1.4.240"
 TERMINAL_APP="${DOTFILES_TERMINAL:-}"
 OS_TYPE="${DOTFILES_OS:-}"
+RUNTIMES=""
 
 log() {
   printf '[dotfiles] %s\n' "$*"
@@ -81,6 +82,83 @@ choose_os() {
       return 1
       ;;
   esac
+}
+
+runtime_selected() {
+  case ",$RUNTIMES," in
+    *",$1,"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+parse_runtimes() {
+  local selection="$1" runtime
+  local parsed=""
+  case "$selection" in
+    none) RUNTIMES=""; return ;;
+    all) selection="node,python,java,rust" ;;
+    ''|,*|*,|*,,*|*$'\n'*) log "Use node,python,java,rust, all, or none for DOTFILES_RUNTIMES"; return 1 ;;
+  esac
+  local entries=()
+  IFS=',' read -r -a entries <<< "$selection"
+  for runtime in "${entries[@]}"; do
+    case "$runtime" in
+      node|python|java|rust) ;;
+      *) log "Invalid runtime: $runtime (expected node, python, java, or rust)"; return 1 ;;
+    esac
+    case ",$parsed," in
+      *",$runtime,"*) ;;
+      *) parsed="${parsed:+$parsed,}$runtime" ;;
+    esac
+  done
+  RUNTIMES="$parsed"
+}
+
+choose_runtimes() {
+  if [ "${DOTFILES_RUNTIMES+x}" = x ]; then
+    parse_runtimes "$DOTFILES_RUNTIMES"
+    return
+  fi
+  if [ ! -t 0 ]; then
+    log "Set DOTFILES_RUNTIMES=node,python (or all / none) for non-interactive setup."
+    return 1
+  fi
+
+  local names=(node python java rust)
+  local labels=("Node.js $NODE_VERSION + npm + pnpm $PNPM_VERSION" "Python $PYTHON_VERSION" "Java $JAVA_VERSION (JVM)" "Rust stable (requires rustup)")
+  local i mark choice runtime updated
+  RUNTIMES="node,python"
+  while true; do
+    printf '\nSelect language runtimes:\n'
+    for i in 0 1 2 3; do
+      mark=' '
+      if runtime_selected "${names[$i]}"; then mark=x; fi
+      printf '  %s) [%s] %s\n' "$((i + 1))" "$mark" "${labels[$i]}"
+    done
+    printf 'Type 1-4 to toggle, a for all, n for none, q to cancel.\n'
+    read -r -p 'Enter to confirm: ' choice || return 1
+    case "$choice" in
+      '') log "selected runtimes: ${RUNTIMES:-none}"; return ;;
+      a) RUNTIMES="node,python,java,rust" ;;
+      n) RUNTIMES="" ;;
+      q) log "setup cancelled"; return 1 ;;
+      1|2|3|4)
+        runtime="${names[$((choice - 1))]}"
+        if runtime_selected "$runtime"; then
+          updated=""
+          for i in "${names[@]}"; do
+            if [ "$i" != "$runtime" ] && runtime_selected "$i"; then
+              updated="${updated:+$updated,}$i"
+            fi
+          done
+          RUNTIMES="$updated"
+        else
+          RUNTIMES="${RUNTIMES:+$RUNTIMES,}$runtime"
+        fi
+        ;;
+      *) log "Enter 1-4, a, n, q, or press Enter." ;;
+    esac
+  done
 }
 
 choose_terminal() {
@@ -284,6 +362,33 @@ install_mise_cli_linux() {
   export PATH="$HOME/.local/bin:$PATH"
 }
 
+install_runtime_managers() {
+  if runtime_selected node || runtime_selected java; then
+    case "$OS_TYPE" in
+      macos)
+        if command -v brew >/dev/null 2>&1; then
+          brew install mise
+        else
+          log "Homebrew is not installed; skipping mise installation"
+        fi
+        ;;
+      linux) install_mise_cli_linux ;;
+    esac
+  fi
+  if runtime_selected python; then
+    case "$OS_TYPE" in
+      macos)
+        if command -v brew >/dev/null 2>&1; then
+          brew install "python@$PYTHON_VERSION"
+        else
+          log "Homebrew is not installed; skipping Python installation"
+        fi
+        ;;
+      linux) install_uv_linux ;;
+    esac
+  fi
+}
+
 install_uv_linux() {
   if command -v uv >/dev/null 2>&1; then
     log "uv is already installed"
@@ -321,15 +426,20 @@ install_agent_clis() {
 }
 
 install_mise_tools() {
+  local tools=()
+  if runtime_selected node; then
+    tools+=("node@$NODE_VERSION" "pnpm@$PNPM_VERSION")
+  fi
+  if runtime_selected java; then
+    tools+=("java@$JAVA_VERSION")
+  fi
+  if [ "${#tools[@]}" -eq 0 ]; then return; fi
   if ! command -v mise >/dev/null 2>&1; then
-    log "mise is not installed; skipping Node.js, pnpm, and Java setup"
+    log "mise is not installed; skipping selected mise runtimes"
     return
   fi
 
-  mise use --global --pin \
-    "node@$NODE_VERSION" \
-    "pnpm@$PNPM_VERSION" \
-    "java@$JAVA_VERSION"
+  mise use --global --pin "${tools[@]}"
 }
 
 install_rust() {
@@ -345,6 +455,7 @@ install_rust() {
 main() {
   choose_os
   choose_terminal
+  choose_runtimes
 
   link_file "$DOTFILES_DIR/config/zsh/zshrc" "$HOME/.zshrc"
   link_file "$DOTFILES_DIR/config/zsh/zprofile" "$HOME/.zprofile"
@@ -364,17 +475,18 @@ main() {
     linux)
       install_apt_packages
       install_orca_linux
-      install_mise_cli_linux
-      install_uv_linux
       ;;
   esac
 
   install_terminal
+  install_runtime_managers
   install_mise_tools
-  install_rust
+  if runtime_selected rust; then install_rust; fi
   install_agent_clis
 
   log "done"
 }
 
-main "$@"
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi

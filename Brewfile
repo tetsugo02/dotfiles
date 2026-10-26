@@ -10,10 +10,7 @@ brew "starship"
 brew "zsh-autocomplete"
 # herdr (terminal multiplexer) is installed cross-platform via its official curl installer in install.sh.
 
-# Development runtimes and package managers
-# Node.js, npm, pnpm, and Java are installed through mise in install.sh.
-brew "mise"
-brew "python@3.14"
+# Runtime managers and language runtimes are installed only when selected in install.sh.
 
 # Media, documents, and research utilities
 brew "ffmpeg"
