@@ -27,8 +27,8 @@ Host murata-lab-spark
     User murata-lab
     IdentityFile ~/.ssh/id_rsa_kenkyushitsu
 
-Host murata-lab-gf-rtx3080-6
-	HostName gf-rtx3080-6.local
+Host murata-lab-gf-rtx3060-0
+	HostName gf-rtx3060-0.local
 	User murata-lab
     IdentityFile ~/.ssh/id_rsa_kenkyushitsu
 	ProxyCommand ssh -CW %h:%p server1
