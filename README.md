@@ -198,6 +198,22 @@ sudo chown -R "$USER":admin /opt/homebrew
 
 ## 設定変更後の反映
 
+### Codex と Claude Code の共通指示
+
+`config/agents/instructions.md` を共通の指示として管理します．`install.sh` はこの内容を `~/.codex/AGENTS.md` と `~/.claude/CLAUDE.md` に追記します．`CODEX_HOME` または `CLAUDE_CONFIG_DIR` を指定している場合は，そのディレクトリを使用します．
+
+既存の指示は残し，`DOTFILES_AGENT_INSTRUCTIONS_START` / `DOTFILES_AGENT_INSTRUCTIONS_END` のコメントで囲んだ部分だけを再実行時に更新します．ファイルがなければ作成し，変更前の既存ファイルは `.backup.XXXXXXXX` に保存します．区切りが壊れている場合は，そのファイルを変更せずエラーにします．既存の指示と共通指示が重なる場合も，管理範囲外の指示は自動削除しません．
+
+共通指示を変更した後や，パッケージの導入を行わず指示だけを反映する場合は，次を実行します．
+
+```sh
+bash scripts/sync-agent-instructions.sh
+```
+
+2026-10-26 の確認時点では，グローバルの `~/.codex/AGENTS.md` に CodeGraph の利用方針，日本語の句読点，文書と実装が食い違う場合の方針があり，`~/.claude/CLAUDE.md` は存在しませんでした．この3項目を共通指示の初期内容としています．
+
+### リンク済みの設定
+
 dotfiles 内のリンク済みファイルを変更した場合は、その内容がリンク先にも反映されます。zsh の設定は新しいシェルを開くか、次のコマンドで読み直します。
 
 ```sh

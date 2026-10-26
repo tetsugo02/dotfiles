@@ -330,6 +330,7 @@ main() {
   link_file "$DOTFILES_DIR/config/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
   link_file "$DOTFILES_DIR/config/git/gitconfig" "$HOME/.gitconfig"
   link_file "$DOTFILES_DIR/config/ssh/config" "$HOME/.ssh/config"
+  bash "$DOTFILES_DIR/scripts/sync-agent-instructions.sh"
 
   case "$OS_TYPE" in
     macos)
